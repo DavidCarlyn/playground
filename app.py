@@ -28,7 +28,6 @@ class GameMenu(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        games = [""]
         tk.Button(self, text="Play Tic Tac Toe", command=self.play_game).pack()
         tk.Button(self, text="Print Hi", command=lambda: print("hi")).pack()
 
