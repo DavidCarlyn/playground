@@ -1,6 +1,7 @@
 import tkinter as tk
 from window import Window
 from tic_tac_toe import TicTacToe
+from chat import Chat
 
 class MainWindow(tk.Frame):
     def __init__(self, master=None):
@@ -30,10 +31,15 @@ class GameMenu(tk.Frame):
     def create_widgets(self):
         tk.Button(self, text="Play Tic Tac Toe", command=self.play_game).pack()
         tk.Button(self, text="Print Hi", command=lambda: print("hi")).pack()
+        tk.Button(self, text="Chat", command=self.open_chat).pack()
 
     def play_game(self):
         self.game_window = Window(self.master)
         self.tic_tac_toe_panel = TicTacToe(self.game_window)
+
+    def open_chat(self):
+        self.chat_window = Window(self.master)
+        self.chat_panel = Chat(self.chat_window)
 
 
 class App(tk.Frame):
