@@ -1,14 +1,30 @@
 cmake_minimum_required(VERSION 2.8)
+
 project(playground)
 
-set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
 
-link_directories("${PROJECT_SOURCE_DIR}/sdl/bin")
-include_directories("${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/sdl/include/SDL2")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-link_directories("${PROJECT_SOURCE_DIR}/sdl_image/bin")
-include_directories("${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/sdl_image/include/SDL2")
+include_directories("${PROJECT_SOURCE_DIR}/include" "${PROJECT_SOURCE_DIR}/include/sdl")
+link_directories("${PROJECT_SOURCE_DIR}/libs/")
 
-add_executable(myMain main.cpp)
-target_link_libraries(myMain mingw32 SDL2main SDL2 SDL2_image)
+add_subdirectory(include)
+add_subdirectory(src)
+
+add_executable(${PROJECT_NAME} main.cpp)
+
+target_link_libraries(${PROJECT_NAME} 
+    SDL2
+    SDL2_image
+    engine)
+
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+
+file( GLOB SDL_LIBS "${PROJECT_SOURCE_DIR}/libs/*.dll")
+file( COPY ${SDL_LIBS} DESTINATION bin)
+
+file( GLOB RESOURCES "${PROJECT_SOURCE_DIR}/resources/*.*")
+file( COPY ${RESOURCES} DESTINATION bin)
