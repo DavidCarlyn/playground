@@ -9,6 +9,12 @@ Engine::Engine() {
 		//TODO: Assert here
 	}
 
+    //Set texture filtering to linear
+	if ( !SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ) ) {
+		printf( "Warning: Linear texture filtering not enabled!" );
+        //TODO: Log here
+	}
+
     //Initialize PNG loading
 	int imgFlags = IMG_INIT_PNG;
 	if (!(IMG_Init( imgFlags ) & imgFlags) ) {
@@ -17,9 +23,9 @@ Engine::Engine() {
 	}
 }
 
-SDL_Window* Engine::createWindow() {
+SDL_Window* Engine::createWindow(const int width, const int height) {
     //Create window
-	SDL_Window* gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _screenWidth, _screenHeight, SDL_WINDOW_SHOWN );
+	SDL_Window* gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN );
 	if ( gWindow == NULL ) {
 		printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
 		//TODO: Assert here
@@ -55,6 +61,19 @@ SDL_Surface* Engine::createImageSurface(SDL_Surface* surface, std::string path) 
 	return optimizedSurface;
 }
 
+SDL_Renderer* Engine::createRenderer(SDL_Window* window) {
+	SDL_Renderer* gRenderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+	if ( gRenderer == NULL ) {
+		printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
+		//TODO: Assert or Log here
+        return gRenderer;
+	}
+
+	SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+
+    return gRenderer;
+}
+
 void Engine::freeSurface(SDL_Surface* surface) {
     SDL_FreeSurface( surface );
 	surface = NULL;
@@ -63,6 +82,11 @@ void Engine::freeSurface(SDL_Surface* surface) {
 void Engine::destroyWindow(SDL_Window* window) {
 	SDL_DestroyWindow( window );
 	window = NULL;
+}
+
+void Engine::destroyRenderer(SDL_Renderer* renderer) {
+    SDL_DestroyRenderer(renderer);
+    renderer = NULL;
 }
 
 void Engine::close() {

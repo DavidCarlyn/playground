@@ -7,14 +7,15 @@ class Engine {
     public:
         Engine();
 
-        SDL_Window* createWindow();
-        SDL_Surface* createSurface(SDL_Window*);
-        SDL_Surface* createImageSurface(SDL_Surface*, std::string);
+        SDL_Window* createWindow(const int width, const int height);
+        SDL_Surface* createSurface(SDL_Window* window);
+        SDL_Surface* createImageSurface(SDL_Surface* surface, std::string path);
+        SDL_Renderer* createRenderer(SDL_Window* window);
 
-        void freeSurface(SDL_Surface*);
-        void destroyWindow(SDL_Window*);
+        void freeSurface(SDL_Surface* surface);
+        void destroyWindow(SDL_Window* window);
+        void destroyRenderer(SDL_Renderer* renderer);
         void close();
     private:
-        const int _screenWidth = 640;
-        const int _screenHeight = 480;
+        
 };
