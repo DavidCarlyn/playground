@@ -1,12 +1,15 @@
 #pragma once
 
-#include <SDL.h>
+#include <ScreenComponent.hpp>
 #include <SDL_ttf.h>
 #include <string>
 
-class Texture {
+class Texture : public ScreenComponent {
 	public:
 		Texture();
+		Texture( Vector2D<int> size );
+        Texture( Vector2D<int> size, Vector2D<int> position );
+        Texture( Vector2D<float> size );
 		~Texture();
 
 		bool load( SDL_Renderer* renderer, std::string path );
@@ -17,14 +20,12 @@ class Texture {
 		void setBlendMode( SDL_BlendMode blending );
 		void setAlpha( Uint8 alpha );
 		
-		void render( SDL_Renderer* renderer, int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE );
+		virtual void render( SDL_Renderer* renderer ) override;
 
 		int getWidth();
 		int getHeight();
 
 	private:
 		SDL_Texture* _texture;
-
-		int _width;
-		int _height;
+		Vector2D<int> _textureSize;
 };

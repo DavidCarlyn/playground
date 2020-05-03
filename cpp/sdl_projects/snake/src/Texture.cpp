@@ -2,10 +2,24 @@
 #include <SDL_image.h>
 #include <iostream>
 
-Texture::Texture() {
+Texture::Texture() : ScreenComponent() {
 	_texture = NULL;
-	_width = 0;
-	_height = 0;
+	_textureSize = Vector2D<int>( 0, 0 );
+}
+
+Texture::Texture( Vector2D<int> size ) : ScreenComponent( size ) {
+	_texture = NULL;
+	_textureSize = Vector2D<int>( 0, 0 );
+}
+
+Texture::Texture( Vector2D<int> size, Vector2D<int> position ) : ScreenComponent( size, position ) {
+	_texture = NULL;
+	_textureSize = Vector2D<int>( 0, 0 );
+}
+
+Texture::Texture( Vector2D<float> size ) : ScreenComponent( size ) {
+	_texture = NULL;
+	_textureSize = Vector2D<int>( 0, 0 );
 }
 
 Texture::~Texture() {
@@ -13,7 +27,6 @@ Texture::~Texture() {
 }
 
 bool Texture::load( SDL_Renderer* renderer, std::string path ) {
-
 	free();
 
 	SDL_Texture* newTexture = NULL;
@@ -38,8 +51,8 @@ bool Texture::load( SDL_Renderer* renderer, std::string path ) {
 	}
 
 	//Get image dimensions
-	_width = loadedSurface->w;
-	_height = loadedSurface->h;
+	_textureSize.setFirst( loadedSurface->w );
+	_textureSize.setSecond( loadedSurface->h );
 
 	//Get rid of old loaded surface
 	SDL_FreeSurface( loadedSurface );
@@ -66,8 +79,8 @@ bool Texture::loadText( SDL_Renderer* renderer, std::string textureText, TTF_Fon
     }
 
     //Get image dimensions
-    _width = textSurface->w;
-    _height = textSurface->h;
+    _textureSize.setFirst( textSurface->w );
+	_textureSize.setSecond( textSurface->h );
 
     //Get rid of old surface
     SDL_FreeSurface( textSurface );
@@ -82,8 +95,7 @@ void Texture::free() {
 	{
 		SDL_DestroyTexture( _texture );
 		_texture = NULL;
-		_width = 0;
-		_height = 0;
+		_textureSize = Vector2D<int>( 0, 0 );
 	}
 }
 
@@ -99,22 +111,8 @@ void Texture::setAlpha( Uint8 alpha ) {
 	SDL_SetTextureAlphaMod( _texture, alpha );
 }
 
-void Texture::render( SDL_Renderer* renderer, int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip ) {
-	SDL_Rect renderQuad = { x, y, _width, _height };
+void Texture::render( SDL_Renderer* renderer ) {
+	SDL_Rect renderQuad = { _position.getFirst(), _position.getSecond(), _size.getFirst(), _size.getSecond() };
 
-	//Set clip rendering dimensions
-	if ( clip != NULL ) {
-		renderQuad.w = clip->w;
-		renderQuad.h = clip->h;
-	}
-
-	SDL_RenderCopyEx( renderer, _texture, clip, &renderQuad, angle, center, flip );
-}
-
-int Texture::getWidth() {
-	return _width;
-}
-
-int Texture::getHeight() {
-	return _height;
+	SDL_RenderCopy( renderer, _texture, NULL, &renderQuad );
 }

@@ -14,7 +14,7 @@ link_directories("${PROJECT_SOURCE_DIR}/libs/")
 add_subdirectory(include)
 add_subdirectory(src)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} test.cpp)
 
 target_link_libraries(${PROJECT_NAME} 
     SDL2

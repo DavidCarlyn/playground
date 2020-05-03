@@ -91,7 +91,7 @@ void Engine::destroyWindow(SDL_Window* window) {
 }
 
 void Engine::destroyRenderer(SDL_Renderer* renderer) {
-    SDL_DestroyRenderer(renderer);
+    SDL_DestroyRenderer( renderer );
     renderer = NULL;
 }
 
