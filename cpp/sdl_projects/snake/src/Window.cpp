@@ -5,7 +5,7 @@ Window::Window() : Window( "NO NAME" ) {}
 
 Window::Window( std::string name ) : Window( name, Vector2D<int> ( 1080, 720 ) ) {}
 
-Window::Window( Vector2D<int> size ) Window( "NO NAME", size ) {}
+Window::Window( Vector2D<int> size ) : Window( "NO NAME", size ) {}
 
 Window::Window( std::string name, Vector2D<int> size ) {
     _size = size;

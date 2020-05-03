@@ -20,6 +20,6 @@ class Window {
         Panel* _windowPanel;
         SDL_Window* _window;
         SDL_Surface* _surface;
-        Vector2D<int> size;
+        Vector2D<int> _size;
 
 };
