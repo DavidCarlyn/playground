@@ -1,31 +1,25 @@
 #include <Snake.hpp>
 
-Snake::Snake() : GameObject() {
+Snake::Snake() : ScreenComponent() {
     _direction = Direction::DOWN;
-    _width = 16;
-    _height = 16;
-    _body = new SnakePart(_x, _y - 1, _width, _height);
+    _gamePosition = Vector2D<int>( 0, 0 );
+    _body = new SnakePart( _size,  Vector2D<int>( _gamePosition.getFirst(), _gamePosition.getSecond() - 1 ) );
 }
 
-Snake::Snake(int x, int y) : GameObject(x, y) {
+Snake::Snake( Vector2D<int> size, Vector2D<int> gamePosition ) : ScreenComponent( size ) {
     _direction = Direction::DOWN;
-    _width = 16;
-    _height = 16;
-    _body = new SnakePart(_x, _y - 1, _width, _height);
+    _gamePosition = gamePosition;
+    _body = new SnakePart( size, Vector2D<int>( gamePosition.getFirst(), gamePosition.getSecond() - 1 ) );
 }
 
-Snake::Snake(int x, int y, int w, int h) : GameObject(x, y) {
-    _direction = Direction::DOWN;
-    _width = w;
-    _height = h;
-    _body = new SnakePart(_x, _y - 1, _width, _height);
+void Snake::setSize( Vector2D<int> size ) {
+    _size = size;
+    _body->setSize( size );
 }
 
-void Snake::setSize(int w, int h) {
-    _width = w;
-    _height = h;
-
-    _body->setSize(w, h);
+void Snake::setPosition( Vector2D<int> position ) {
+    ScreenComponent::setPosition( position );
+    _body->setPosition( position );
 }
 
 void Snake::handleInput( SDL_Event e ) {
@@ -51,127 +45,120 @@ void Snake::handleInput( SDL_Event e ) {
     }
 }
 
-bool Snake::didCollide(int x, int y) {
-    if ( _x == x && _y == y ) return true;
-    return didCollideWithBody(x, y);
+bool Snake::didCollide( Vector2D<int> gamePosition ) {
+    if ( _gamePosition.equals( gamePosition ) ) return true;
+    return didCollideWithBody( gamePosition );
 }
 
-bool Snake::didCollideWithBody(int x, int y) {
-    return _body->didCollide(x, y);
+bool Snake::didCollideWithBody( Vector2D<int> gamePosition ) {
+    return _body->didCollide( gamePosition );
 }
 
 void Snake::move() {
-    _body->update(_x, _y);
+    _body->update( _gamePosition );
+    int x = _gamePosition.getFirst();
+    int y = _gamePosition.getSecond();
     switch(_direction) {
         case UP:
-            _y -= 1;
+            y -= 1;
             break;
         case RIGHT:
-            _x += 1;
+            x += 1;
             break;
         case DOWN:
-            _y += 1;
+            y += 1;
             break;
         case LEFT:
-            _x -= 1;
+            x -= 1;
             break;
         default:
             break;
     }
+
+    _gamePosition = Vector2D<int>( x, y );
 }
 
 void Snake::grow() {
-    _body->grow( _x, _y );
+    _body->grow( _gamePosition );
 }
 
-void Snake::render(SDL_Renderer* renderer) {
-    render( renderer, 0, 0 );
-}
-
-void Snake::render(SDL_Renderer* renderer, int xMargin, int yMargin ) {
+void Snake::render( SDL_Renderer* renderer ) {
     SDL_SetRenderDrawColor( renderer, 0x00, 0xFF, 0x00, 0xFF );
     SDL_Rect rect;
-    rect.x = xMargin + _x * _width;
-    rect.y = yMargin + _y * _height;
-    rect.w = _width;
-    rect.h = _height;
+    rect.x = _position.getFirst() + _gamePosition.getFirst() * _size.getFirst();
+    rect.y = _position.getSecond() + _gamePosition.getSecond() * _size.getSecond();
+    rect.w = _size.getFirst();
+    rect.h = _size.getSecond();
     SDL_RenderFillRect( renderer, &rect );
-    _body->render( renderer, xMargin, yMargin );
+    _body->render( renderer );
 
 }
 
-Snake::SnakePart::SnakePart() : GameObject() {
+Snake::SnakePart::SnakePart() : ScreenComponent() {
     _next = NULL;
-    _width = 16;
-    _height = 16;
+    _gamePosition = Vector2D<int>( 0, 0 );
 }
 
-Snake::SnakePart::SnakePart(int x, int y) : GameObject(x, y) {
+Snake::SnakePart::SnakePart( Vector2D<int> size, Vector2D<int> gamePosition ) : ScreenComponent( size ) {
     _next = NULL;
-    _width = 16;
-    _height = 16;
+    _gamePosition = gamePosition;
 }
 
-Snake::SnakePart::SnakePart(int x, int y, int w, int h) : GameObject(x, y) {
-    _next = NULL;
-    _width = w;
-    _height = h;
-}
-
-void Snake::SnakePart::setSize(int w, int h) {
-    _width = w;
-    _height = h;
+void Snake::SnakePart::setSize( Vector2D<int> size ) {
+    _size = size;
     if ( _next != NULL ) {
-        _next->setSize(w, h);
+        _next->setSize( size );
     }
 }
 
-bool Snake::SnakePart::didCollide(int x, int y) {
-    if ( _x == x && _y == y ) return true;
+void Snake::SnakePart::setPosition( Vector2D<int> position ) {
+    ScreenComponent::setPosition( position );
+    if ( _next != NULL ) {
+        _next->setPosition( position );
+    }
+}
 
+bool Snake::SnakePart::didCollide( Vector2D<int> gamePosition ) {
+    if ( _gamePosition.equals( gamePosition ) ) return true;
     if ( _next == NULL ) return false;
-
-    return _next->didCollide(x, y);
+    return _next->didCollide( gamePosition );
 }
 
-void Snake::SnakePart::update(int x, int y) {
+void Snake::SnakePart::update( Vector2D<int> gamePosition ) {
     if ( _next != NULL ) {
-        _next->update(_x, _y);
+        _next->update( _gamePosition );
     }
-    _x = x;
-    _y = y;
+
+    _gamePosition = gamePosition;
 }
 
-void Snake::SnakePart::grow( int prevX, int prevY ) {
+void Snake::SnakePart::grow( Vector2D<int> prevGamePosition ) {
     if ( _next != NULL ) {
-        _next->grow( _x, _y );
+        _next->grow( _gamePosition );
         return;
     }
 
     int dx = 0;
     int dy = 0;
 
-    if ( _x != prevX ) {
-        dx = _x - prevX;
+    if ( _gamePosition.getFirst() != prevGamePosition.getFirst() ) {
+        dx = _gamePosition.getFirst() - prevGamePosition.getFirst();
     } else {
-        dy = _y - prevY;
+        dy = _gamePosition.getSecond() - prevGamePosition.getSecond();
     }
 
-    _next = new SnakePart( _x + dx, _y + dy, _width, _height ); //TODO: set correct position
+    _next = new SnakePart( _size, Vector2D<int>( _gamePosition.getFirst() + dx, _gamePosition.getSecond() + dy ) ); //TODO: set correct position
+    _next->setPosition( _position );
 }
 
 void Snake::SnakePart::render( SDL_Renderer* renderer ) {
-    render( renderer, 0, 0 );
-}
-
-void Snake::SnakePart::render( SDL_Renderer* renderer, int xMargin, int yMargin ) {
     SDL_Rect rect;
-    rect.x = xMargin + _x * _width;
-    rect.y = yMargin + _y * _height;
-    rect.w = _width;
-    rect.h = _height;
+    rect.x = _position.getFirst() + _gamePosition.getFirst() * _size.getFirst();
+    rect.y = _position.getSecond() + _gamePosition.getSecond() * _size.getSecond();
+    rect.w = _size.getFirst();
+    rect.h = _size.getSecond();
     SDL_RenderFillRect( renderer, &rect );
     if ( _next != NULL ) {
-        _next->render( renderer, xMargin, yMargin );
+        _next->render( renderer );
     }
 }

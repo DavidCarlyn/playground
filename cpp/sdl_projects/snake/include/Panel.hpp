@@ -12,6 +12,9 @@ class Panel : public ScreenComponent {
         Panel( Vector2D<int> size, Vector2D<int> position);
         Panel( Vector2D<float> size );
 
+        virtual void setSize( Vector2D<int> size ) override;
+        virtual void setSize( Vector2D<float> size ) override;
+
         void setBackgroundColor( SDL_Color color ) { _backgroundColor = color; }
 
         virtual void addComponent( ScreenComponent* component );

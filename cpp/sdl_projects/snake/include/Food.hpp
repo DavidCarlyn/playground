@@ -1,20 +1,16 @@
 #pragma once
 
-#include <GameObject.hpp>
+#include <ScreenComponent.hpp>
 
-class Food : public GameObject {
+class Food : public ScreenComponent {
     public:
         Food();
-        Food( int x, int y );
-        Food( int x, int y, int w, int h );
+        Food( Vector2D<int> size, Vector2D<int> position );
 
-        int getWidth() { return _width; }
-        int getHeight() { return _height; }
-        void setSize( int w, int h ) { _width = w; _height = h; }
+        Vector2D<int> getGamePosition() { return _gamePosition; }
+        void setGamePosition( Vector2D<int> position ) { _gamePosition = position; }
 
-        virtual void render( SDL_Renderer* renderer );
-        void render( SDL_Renderer* renderer, int xMargin, int yMargin );
+        virtual void render( SDL_Renderer* renderer ) override;
     private:
-        int _width;
-        int _height;
+        Vector2D<int> _gamePosition;
 };

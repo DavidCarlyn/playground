@@ -1,48 +1,43 @@
 #pragma once
 
-#include <GameObject.hpp>
+#include <ScreenComponent.hpp>
 
-class Snake : public GameObject {
+class Snake : public ScreenComponent {
     public:
         Snake();
-        Snake( int x, int y );
-        Snake( int x, int y, int w, int h );
+        Snake( Vector2D<int> size, Vector2D<int> gamePosition );
 
-        int getWidth() { return _width; }
-        int getHeight() { return _height; }
-        void setSize( int w, int h );
+        void setSize( Vector2D<int> size );
+        void setPosition( Vector2D<int> position ) override;
+        Vector2D<int> getGamePosition() { return _gamePosition; }
 
         void handleInput( SDL_Event e );
-        bool didCollide( int x, int y );
-        bool didCollideWithBody( int x, int y );
+        bool didCollide( Vector2D<int> gamePosition );
+        bool didCollideWithBody( Vector2D<int> gamePosition );
 
         void move();
         void grow();
 
-        virtual void render( SDL_Renderer* renderer );
-        void render( SDL_Renderer* renderer, int xMargin, int yMargin );
+        virtual void render( SDL_Renderer* renderer ) override;
     private:
-        class SnakePart : public GameObject {
+        class SnakePart : public ScreenComponent {
             public:
                 SnakePart();
-                SnakePart( int x, int y );
-                SnakePart( int x, int y, int w, int h );
+                SnakePart( Vector2D<int> size, Vector2D<int> gamePosition );
 
-                int getWidth() { return _width; }
-                int getHeight() { return _height; }
-                void setSize( int w, int h );
+                void setSize( Vector2D<int> size );
+                void setPosition( Vector2D<int> position ) override;
+                Vector2D<int> getGamePosition() { return _gamePosition; }
 
-                bool didCollide( int x, int y );
+                bool didCollide( Vector2D<int> gamePosition );
 
-                void update( int x, int y );
-                void grow( int prevX, int prevY );
+                void update( Vector2D<int> gamePosition );
+                void grow( Vector2D<int> prevGamePosition );
 
-                virtual void render( SDL_Renderer* renderer );
-                void render( SDL_Renderer* renderer, int xMargin, int yMargin );
+                virtual void render( SDL_Renderer* renderer ) override;
             private:
                 SnakePart* _next;
-                int _width;
-                int _height;
+                Vector2D<int> _gamePosition;
         };
 
         enum Direction {
@@ -54,8 +49,6 @@ class Snake : public GameObject {
 
         Direction _direction;
         SnakePart* _body;
-
-        int _width;
-        int _height;
+        Vector2D<int> _gamePosition;
 
 };

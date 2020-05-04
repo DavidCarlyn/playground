@@ -16,6 +16,26 @@ Panel::Panel( Vector2D<float> size ) : ScreenComponent( size ) {
     _backgroundColor = { 255, 255, 255, 255 };
 }
 
+void Panel::setSize( Vector2D<int> size ) {
+    _size = size;
+
+    std::list<ScreenComponent*> listCopy = _components;
+    _components.clear();
+
+    for ( auto comp : listCopy ) {
+        addComponent( comp );
+    }
+}
+
+void Panel::setSize( Vector2D<float> size ) {
+    _relativeSize = size;
+    float xScale = size.getFirst() / _relativeSize.getFirst();
+    float yScale = size.getSecond() / _relativeSize.getSecond();
+
+    setSize( Vector2D<int>( xScale * _size.getFirst(), yScale * _size.getSecond() ) );
+}
+
+
 Panel::~Panel() {
     while ( _components.size() > 0 ) {
         delete _components.front();

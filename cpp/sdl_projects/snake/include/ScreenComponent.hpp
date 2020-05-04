@@ -12,6 +12,8 @@ class Vector2D {
         void setFirst( T v ) { _v0 = v; }
         void setSecond( T v ) { _v1 = v; }
 
+        bool equals( Vector2D rhs ) { return rhs.getFirst() == _v0 && rhs.getSecond() == _v1; }
+
     private:
         T _v0;
         T _v1;
@@ -30,8 +32,9 @@ class ScreenComponent {
         ScreenComponent( Vector2D<float> size );
 
         void setDisplayType( DisplayType type ) { _displayType = type; }
-        void setPosition( Vector2D<int> position ) { _position = position; }
-        void setSize( Vector2D<int> size ) { _size = size; }
+        virtual void setPosition( Vector2D<int> position ) { _position = position; }
+        virtual void setSize( Vector2D<int> size ) { _size = size; }
+        virtual void setSize( Vector2D<float> size ) { _relativeSize = size; }
 
         DisplayType getDisplayType() { return _displayType; }
         Vector2D<int> getPosition() { return _position; }
