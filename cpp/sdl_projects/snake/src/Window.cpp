@@ -20,6 +20,8 @@ Window::Window( std::string name, Vector2D<int> size ) {
 	if ( _renderer == NULL ) {
 		std::cerr << "Renderer could not be created! SDL Error: " << SDL_GetError() << std::endl;
 	}
+
+    _windowPanel = new Panel( size, Vector2D<int>(0, 0) );
 }
 
 Window::~Window() {
@@ -33,5 +35,34 @@ Window::~Window() {
 }
 
 void Window::display() {
+    SDL_Event e;
+    bool quit = false;
+    while ( !quit ) {
+		//Handle events on queue
+		while ( SDL_PollEvent( &e ) != 0 ) {
+			//User requests quit
+			if ( e.type == SDL_QUIT ) {
+				quit = true;
+			} else if ( e.type == SDL_WINDOWEVENT ) {
+				switch ( e.window.event ) {
+					case SDL_WINDOWEVENT_SIZE_CHANGED:
+					case SDL_WINDOWEVENT_RESIZED:
+						int screenWidth = e.window.data1;
+						int screenHeight = e.window.data2;
+                        _windowPanel->setSize( Vector2D<int>( screenWidth, screenHeight ) );
+                }
+            }
+		}
 
+
+        //Clear screen
+		SDL_SetRenderDrawColor( _renderer, 0x00, 0x00, 0x00, 0xFF );
+		SDL_RenderClear( _renderer );
+
+        _windowPanel->render( _renderer );
+
+		//Update screen
+		SDL_RenderPresent( _renderer );
+        
+    }
 }

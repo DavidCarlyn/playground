@@ -9,63 +9,97 @@ and may not be redistributed without written permission.*/
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <Engine.hpp>
+#include <Panel.hpp>
 #include <Texture.hpp>
 #include <Snake.hpp>
 #include <Food.hpp>
+#include <Scene.hpp>
 #include <stdlib.h>
-#include <time.h> 
+#include <ctime>
 
-int getRandomPosition(int max) {
-	return rand() % max;
-}
+const std::string FONTPATH = "LemonMilk.otf";
 
-int getBlockSize(int screenWidth, int screenHeight, int xBlocks, int yBlocks) {
-	int xBlockSize = screenWidth / xBlocks;
-	int yBlockSize = screenHeight / yBlocks;
+class GameScene : public Scene {
+	public:
+		GameScene() : Scene() {}
+		GameScene( SDL_Window* w, SDL_Surface* s, SDL_Renderer* r ) : Scene( w, s, r ) {}
 
-	return xBlockSize < yBlockSize ? xBlockSize : yBlockSize;
-}
+		virtual int start() override;
 
-int main( int argc, char* args[] ) {
+		int getScore() { return _score; }
+	private:
+		int getRandomPosition( int max ) { return rand() % max; }
+		int getBlockSize() {
+			int xBlockSize = ( _screenWidth - _borderPadding.getFirst() ) / _xBlocks;
+			int yBlockSize = ( _screenHeight - _borderPadding.getSecond() ) / _yBlocks;
+			return xBlockSize < yBlockSize ? xBlockSize : yBlockSize;
+		}
+
+		int _screenWidth;
+		int _screenHeight;
+		int _xBlocks;
+		int _yBlocks;
+		int _score;
+		Vector2D<int> _borderPadding;
+};
+
+int GameScene::start() {
 	srand(time(NULL));
+
+	_screenHeight = _surface->h;
+	_screenWidth = _surface->w;
+
 	const int ticksPerFrame = 100;
 	const int borderThickness = 6;
+    _borderPadding = Vector2D<int>( borderThickness/2, borderThickness/2 );
 
+	_yBlocks = 30;
+	_xBlocks = 50;
 
-	int screenWidth = 960;
-    int screenHeight = 720;
-	int yBlocks = 30;
-	int xBlocks = 50;
+	int blockSize = getBlockSize();
 
-	int topBarHeight = 50;
+	Panel* windowPanel = new Panel( Vector2D<int>( _screenWidth, _screenHeight ) );
+    windowPanel->setBackgroundColor( { 0, 0, 0, 255 } );
 
-	int blockSize = getBlockSize(screenWidth, screenHeight-topBarHeight, xBlocks, yBlocks);
-	int xMargin = (screenWidth - blockSize * xBlocks) / 2;
-	int yMargin = topBarHeight + (screenHeight - blockSize * yBlocks) / 2;
+    Panel* scorePanel = new Panel( Vector2D<float>( 1.0f, 0.2f ) );
+    scorePanel->setBackgroundColor( { 0, 0, 0, 255 } );
 
-	Engine* gameEngine = new Engine();
-	SDL_Window* window = gameEngine->createWindow(screenWidth, screenHeight, "Snake");
-	SDL_Surface* surface = gameEngine->createSurface(window);
-	SDL_Renderer* renderer = gameEngine->createRenderer(window);
+    Panel* gamePanel = new Panel( Vector2D<float>( 1.0f, 0.8f ) );
+    gamePanel->setBackgroundColor( { 255, 255, 255, 255 } );
 
-	TTF_Font* font = TTF_OpenFont( "LemonMilk.otf", 56 );
+    windowPanel->addComponent( scorePanel );
+    windowPanel->addComponent( gamePanel );
+
+    TTF_Font* font = TTF_OpenFont( FONTPATH.c_str(), 56 );
 	if ( font == NULL ) {
 		std::cout << TTF_GetError() << std::endl;
 	}
 
-	Texture* texture = new Texture();
-	SDL_Color textColor = { 0, 255, 0 };
-	int score = 0;
-	texture->loadText( renderer, "Snake: " + std::to_string(score), font, textColor );
+    Texture* text = new Texture( Vector2D<float>( 0.2f, 0.5f ) );
+    _score = 0;
+    text->loadText( _renderer, "Snake: " + std::to_string( _score ), font, { 0, 255, 0, 255 });
 
-	Snake* snake = new Snake(1, 1, blockSize, blockSize);
-	Food* food = new Food(getRandomPosition(xBlocks), getRandomPosition(yBlocks), blockSize, blockSize);
+    scorePanel->addComponent( text );
+
+    Snake* snake = new Snake( Vector2D<int>( blockSize, blockSize ), Vector2D<int>( 1, 1 ) );
+    snake->setPosition( _borderPadding );
+	Food* food = new Food( Vector2D<int>( blockSize, blockSize ), Vector2D<int>( getRandomPosition( _xBlocks ), getRandomPosition( _yBlocks ) ) );
+    food->setPosition( _borderPadding );
+
+    Panel* gameBoard = new Panel( Vector2D<int>( blockSize * _xBlocks, blockSize * _yBlocks) );
+    gameBoard->setBackgroundColor( { 0, 0, 0, 255 } );
+    gameBoard->setPosition( _borderPadding );
+    
+    gamePanel->addComponent( gameBoard );
+    gamePanel->addComponent( snake );
+    gamePanel->addComponent( food );
 
 	bool quit = false;
 	SDL_Event e;
 
-	int scrollingOffset = 0;
-	int ticks = 0;
+	int moveToEndScreen = 0;
+
+    int ticks = 0;
 	Uint32 lastTicks = SDL_GetTicks();
 	while ( !quit ) {
 		//Handle events on queue
@@ -76,49 +110,25 @@ int main( int argc, char* args[] ) {
 			} else if ( e.type == SDL_WINDOWEVENT ) {
 				switch ( e.window.event ) {
 					case SDL_WINDOWEVENT_SIZE_CHANGED:
-					case SDL_WINDOWEVENT_MAXIMIZED:
-					case SDL_WINDOWEVENT_MINIMIZED:
 					case SDL_WINDOWEVENT_RESIZED:
-						screenWidth = e.window.data1;
-						screenHeight = e.window.data2;
-						blockSize = getBlockSize( screenWidth, screenHeight, xBlocks, yBlocks );
-						xMargin = (screenWidth - blockSize * xBlocks) / 2;
-						yMargin = (screenHeight - blockSize * yBlocks) / 2;
-						snake->setSize( blockSize, blockSize );
-						food->setSize( blockSize, blockSize );
-						snake->render( renderer, xMargin, yMargin );
-						food->render( renderer, xMargin, yMargin );
-            			break;
-					default:
-						break;
-				}
-			}
+						_screenWidth = e.window.data1;
+						_screenHeight = e.window.data2;
+                        blockSize = getBlockSize();
+                        snake->setPosition( _borderPadding );
+                        food->setPosition( _borderPadding );
+                        gameBoard->setPosition( _borderPadding );
+                        windowPanel->setSize( Vector2D<int>( _screenWidth, _screenHeight ) );
+                        gameBoard->setSize( Vector2D<int>( blockSize * _xBlocks, blockSize * _yBlocks) );
+                        snake->setSize( Vector2D<int>( blockSize, blockSize ) );
+                        food->setSize( Vector2D<int>( blockSize, blockSize ) );
 
-			snake->handleInput( e );
+                }
+            }
+
+            snake->handleInput( e );
 		}
 
-		//Clear screen
-		SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
-		SDL_RenderClear( renderer );
-
-		// Draw border
-		SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-		SDL_Rect border;
-		border.x = xMargin - borderThickness;
-		border.y = yMargin - borderThickness;
-		border.w = xBlocks * blockSize + borderThickness * 2;
-		border.h = yBlocks * blockSize + borderThickness * 2;
-		SDL_RenderFillRect( renderer, &border );
-		SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
-		border.x += borderThickness;
-		border.y += borderThickness;
-		border.w -= borderThickness * 2;
-		border.h -= borderThickness * 2;
-		SDL_RenderFillRect( renderer, &border );
-
-
-
-		//TODO: control speed
+        //TODO: control speed
 		Uint32 curTicks = SDL_GetTicks();
 		ticks += curTicks - lastTicks;
 		lastTicks = curTicks;
@@ -129,90 +139,263 @@ int main( int argc, char* args[] ) {
 				snake->move();
 				ticks -= ticksPerFrame;
 
-				if ( snake->getX() < 0 || snake->getX() > xBlocks-1 ) {
+                int snakeX = snake->getGamePosition().getFirst();
+                int snakeY = snake->getGamePosition().getSecond();
+				if ( snakeX < 0 || snakeX > _xBlocks-1 ) {
 					quit = true;
-				} else if ( snake->getY() < 0 || snake->getY() > yBlocks-1 ) {
+					moveToEndScreen = 1;
+				} else if ( snakeY < 0 || snakeY > _yBlocks-1 ) {
 					quit = true;
-				} else if ( snake->didCollideWithBody( snake->getX(), snake->getY() ) ) {
+					moveToEndScreen = 1;
+				} else if ( snake->didCollideWithBody( Vector2D<int>( snakeX, snakeY ) ) ) {
 					quit = true;
+					moveToEndScreen = 1;
 				}
 
-				if ( snake->getX() == food->getX() && snake->getY() == food->getY() ) {
+				if ( snake->getGamePosition().equals( food->getGamePosition() ) ) {
 					snake->grow();
-					++score;
-					texture->loadText( renderer, "Snake: " + std::to_string(score), font, textColor );
+					++_score;
+					text->loadText( _renderer, "Snake: " + std::to_string( _score ), font, { 0, 255, 0, 255 } );
 					int newX = 0;
 					int newY = 0;
 					do {
-						newX = getRandomPosition( xBlocks );
-						newY = getRandomPosition( yBlocks );
-					} while ( snake->didCollide( newX, newY ) );
+						newX = getRandomPosition( _xBlocks );
+						newY = getRandomPosition( _yBlocks );
+					} while ( snake->didCollide( Vector2D<int>( newX, newY ) ) );
 					
-					food->setPos( newX, newY );
+					food->setGamePosition( Vector2D<int>( newX, newY ) );
 				}
 			}
 		}
 
 		if ( quit ) {
-			break;
+			return moveToEndScreen;
 		}
 
-		texture->render( renderer, 0 + xMargin, 10 );
+		//Clear screen
+		SDL_SetRenderDrawColor( _renderer, 0x00, 0x00, 0x00, 0xFF );
+		SDL_RenderClear( _renderer );
 
-		snake->render( renderer, xMargin, yMargin );
-		food->render( renderer, xMargin, yMargin );
+        windowPanel->render( _renderer );
+
 
 		//Update screen
-		SDL_RenderPresent( renderer );
+		SDL_RenderPresent( _renderer );
 	}
 
-	//TODO: temp
-	TTF_Font* game_over_font = TTF_OpenFont( "LemonMilk.otf", 224 );
+
+	delete windowPanel;
+	TTF_CloseFont( font );
+	font = NULL;
+
+	return moveToEndScreen;
+}
+
+class StartingScene : public Scene {
+	public:
+		StartingScene() : Scene() {}
+		StartingScene( SDL_Window* w, SDL_Surface* s, SDL_Renderer* r ) : Scene( w, s, r ) {}
+
+		virtual int start() override;
+};
+
+class EndingScene : public Scene {
+	public:
+		EndingScene( int score ) : Scene() { _score = score; }
+		EndingScene( int score, SDL_Window* w, SDL_Surface* s, SDL_Renderer* r ) : Scene( w, s, r ) { _score = score; }
+
+		virtual int start() override;
+
+	private:
+		int _score;
+};
+
+int StartingScene::start() {
+	int screenHeight = _surface->h;
+	int screenWidth = _surface->w;
+
+	Panel* windowPanel = new Panel( Vector2D<int>( screenWidth, screenHeight ) );
+    windowPanel->setBackgroundColor( { 0, 0, 0, 255 } );
+
+	TTF_Font* font = TTF_OpenFont( FONTPATH.c_str(), 56 );
 	if ( font == NULL ) {
 		std::cout << TTF_GetError() << std::endl;
 	}
-	Texture* game_over_texture = new Texture();
-	game_over_texture->loadText( renderer, "Game Over", font, textColor );
-	quit = false;
+
+	Texture* title = new Texture( Vector2D<float>( 1.0f, 0.5f ) );
+	title->loadText( _renderer, "Snake", font, { 0, 255, 0, 255 } );
+
+	Texture* instructions = new Texture( Vector2D<float>( 1.0f, 0.5f ) );
+	instructions->loadText( _renderer, "Click Left Mouse to Play...", font, { 0, 255, 0, 255 } );
+
+	windowPanel->addComponent( title );
+	windowPanel->addComponent( instructions );
+
+	bool quit = false;
+	SDL_Event e;
+	int playGame = 0;
+
 	while ( !quit ) {
+		//Handle events on queue
 		while ( SDL_PollEvent( &e ) != 0 ) {
 			//User requests quit
 			if ( e.type == SDL_QUIT ) {
 				quit = true;
+			} else if ( e.type == SDL_WINDOWEVENT ) {
+				switch ( e.window.event ) {
+					case SDL_WINDOWEVENT_SIZE_CHANGED:
+					case SDL_WINDOWEVENT_RESIZED:
+						screenWidth = e.window.data1;
+						screenHeight = e.window.data2;
+						windowPanel->setSize( Vector2D<int>( screenWidth, screenHeight ) );
+
+                }
+            } else if ( e.type == SDL_MOUSEBUTTONUP ) {
+				quit = true;
+				playGame = 1;
 			}
 		}
+
 		//Clear screen
-		SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
-		SDL_RenderClear( renderer );
+		SDL_SetRenderDrawColor( _renderer, 0x00, 0x00, 0x00, 0xFF );
+		SDL_RenderClear( _renderer );
 
-		// Draw border
-		SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-		SDL_Rect border;
-		border.x = xMargin - borderThickness;
-		border.y = yMargin - borderThickness;
-		border.w = xBlocks * blockSize + borderThickness * 2;
-		border.h = yBlocks * blockSize + borderThickness * 2;
-		SDL_RenderFillRect( renderer, &border );
-		SDL_SetRenderDrawColor( renderer, 0x00, 0x00, 0x00, 0xFF );
-		border.x += borderThickness;
-		border.y += borderThickness;
-		border.w -= borderThickness * 2;
-		border.h -= borderThickness * 2;
-		SDL_RenderFillRect( renderer, &border );
-
-		texture->render( renderer, 0 + xMargin, 10 );
-
-		game_over_texture->render( renderer, (screenWidth / 2) - 200, (screenHeight / 2) - 50 );
+        windowPanel->render( _renderer );
 
 		//Update screen
-		SDL_RenderPresent( renderer );
+		SDL_RenderPresent( _renderer );
 	}
 
+	delete windowPanel;
 	TTF_CloseFont( font );
-    font = NULL;
+	font = NULL;
 
+	return playGame;
+}
+
+int EndingScene::start() {
+	int screenHeight = _surface->h;
+	int screenWidth = _surface->w;
+
+	Panel* windowPanel = new Panel( Vector2D<int>( screenWidth, screenHeight ) );
+    windowPanel->setBackgroundColor( { 0, 0, 0, 255 } );
+
+	TTF_Font* font = TTF_OpenFont( FONTPATH.c_str(), 56 );
+	if ( font == NULL ) {
+		std::cout << TTF_GetError() << std::endl;
+	}
+
+	Texture* gameOverText = new Texture( Vector2D<float>( 1.0f, 0.333f ) );
+	gameOverText->loadText( _renderer, "Game Over", font, { 0, 255, 0, 255 } );
+	
+	Panel* scorePanel = new Panel( Vector2D<float>( 1.0f, 0.333f ) );
+	scorePanel->setBackgroundColor( { 0, 0, 0, 255 } );
+
+	Panel* options = new Panel( Vector2D<float>( 1.0f, 0.333f ) );
+	options->setBackgroundColor( { 0, 0, 0, 255 } );
+
+	windowPanel->addComponent( gameOverText );
+	windowPanel->addComponent( scorePanel );
+	windowPanel->addComponent( options );
+
+	Texture* scoreLabel = new Texture( Vector2D<float>( 0.48f, 1.0f ) );
+	scoreLabel->loadText( _renderer, "Score: " , font, { 0, 255, 0, 255 } );
+
+	float size = 0.00f;
+	int tmp = _score;
+	do {
+		tmp /= 10;
+		size += 0.10f;
+	} while ( tmp > 0 );
+
+	Texture* scoreText = new Texture( Vector2D<float>( size, 1.0f ) );
+	scoreText->loadText( _renderer, std::to_string( _score ) , font, { 255, 0, 0, 255 } );
+
+	scorePanel->addComponent( scoreLabel );
+	scorePanel->addComponent( scoreText );
+
+	Texture* playAgain = new Texture( Vector2D<float>( 0.48f, 1.0f ) );
+	playAgain->loadText( _renderer, "Play Again", font, { 0, 255, 0, 255 } );
+
+	Texture* quitButton = new Texture( Vector2D<float>( 0.48f, 1.0f ) );
+	quitButton->loadText( _renderer, "Quit", font, { 0, 255, 0, 255 } );
+
+	options->addComponent( playAgain );
+	options->addComponent( quitButton );
+
+	bool quit = false;
+	SDL_Event e;
+	int playAgainReturn = 0;
+
+	while ( !quit ) {
+		//Handle events on queue
+		while ( SDL_PollEvent( &e ) != 0 ) {
+			//User requests quit
+			if ( e.type == SDL_QUIT ) {
+				quit = true;
+			} else if ( e.type == SDL_WINDOWEVENT ) {
+				switch ( e.window.event ) {
+					case SDL_WINDOWEVENT_SIZE_CHANGED:
+					case SDL_WINDOWEVENT_RESIZED:
+						screenWidth = e.window.data1;
+						screenHeight = e.window.data2;
+						windowPanel->setSize( Vector2D<int>( screenWidth, screenHeight ) );
+
+                }
+            } else if ( e.type == SDL_MOUSEBUTTONUP ) {
+				if ( e.button.y >= options->getPosition().getSecond() ) {
+					quit = true;
+					if ( e.button.x <= options->getPosition().getFirst() + options->getSize().getFirst() / 2 ) {
+						playAgainReturn = 1;
+					}
+				}
+			}
+		}
+
+		//Clear screen
+		SDL_SetRenderDrawColor( _renderer, 0x00, 0x00, 0x00, 0xFF );
+		SDL_RenderClear( _renderer );
+
+        windowPanel->render( _renderer );
+
+		//Update screen
+		SDL_RenderPresent( _renderer );
+	}
+
+	delete windowPanel;
+	TTF_CloseFont( font );
+	font = NULL;
+
+	return playAgainReturn;
+}
+
+int main( int argc, char* args[] ) {
+	int screenWidth = 956;
+    int screenHeight = 720;
+
+    Engine* gameEngine = new Engine();
+	SDL_Window* window = gameEngine->createWindow(screenWidth, screenHeight, "Snake");
+	SDL_Surface* surface = gameEngine->createSurface(window);
+	SDL_Renderer* renderer = gameEngine->createRenderer(window);
+
+	while ( true ) {
+		StartingScene* startScene = new StartingScene( window, surface, renderer );
+		if ( startScene->start() == 0 ) { break; }
+		delete startScene;
+
+    	GameScene* gameScene = new GameScene( window, surface, renderer );
+		if ( gameScene->start() == 0 ) { break; }
+
+		EndingScene* endScene = new EndingScene( gameScene->getScore(), window, surface, renderer );
+		if ( endScene->start() == 0 ) { break; }
+		delete gameScene;
+		delete endScene;
+	}
+
+    gameEngine->destroyWindow(window);
+    gameEngine->freeSurface(surface);
+    gameEngine->destroyRenderer(renderer);
 	gameEngine->close();
-	delete snake;
 	delete gameEngine;
 
 	return 0;

@@ -11,6 +11,7 @@ class Window {
         Window( std::string name, Vector2D<int> size );
         ~Window();
 
+        void addComponent( ScreenComponent* component ) { _windowPanel->addComponent( component ); }
         void display();
 
     protected:

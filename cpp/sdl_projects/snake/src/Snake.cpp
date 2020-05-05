@@ -26,17 +26,21 @@ void Snake::handleInput( SDL_Event e ) {
 	if ( (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) && e.key.repeat == 0 ) {
         switch( e.key.keysym.sym ) {
             case SDLK_UP:
+            case SDLK_w:
                 if ( _direction == Direction::DOWN ) break;
                 _direction = Direction::UP;
                 break;
+            case SDLK_s:
             case SDLK_DOWN:
                 if ( _direction == Direction::UP ) break;
                 _direction = Direction::DOWN;
                 break;
+            case SDLK_a:
             case SDLK_LEFT:
                 if ( _direction == Direction::RIGHT ) break;
                 _direction = Direction::LEFT;
                 break;
+            case SDLK_d:
             case SDLK_RIGHT:
                 if ( _direction == Direction::LEFT ) break;
                 _direction = Direction::RIGHT;
