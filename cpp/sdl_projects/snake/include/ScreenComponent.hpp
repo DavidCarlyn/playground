@@ -19,9 +19,18 @@ class Vector2D {
         T _v1;
 };
 
+//TODO: set positioning and size to have an independent display type
 enum DisplayType {
     RELATIVE,
     ABSOLUTE
+};
+
+//TODO: by default all screen components should be NONE. Have ability to set anchor location
+enum AnchorLocation {
+    NONE,
+    NORTHWEST,  NORTH,  NORTHEAST,
+    WEST,       CENTER, EAST,
+    SOUTHWEST,  SOUTH,  SOUTHEAST
 };
 
 class ScreenComponent {
