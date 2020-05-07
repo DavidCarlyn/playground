@@ -59,6 +59,9 @@ class ScreenComponent {
         virtual void setSize( Vector2D<int> size ) { _absoluteSize = size; }
         virtual void setSize( Vector2D<float> size ) { _relativeSize = size; }
 
+        void setAnchorLocation( AnchorLocation anchor ) { _anchor = anchor; }
+        AnchorLocation getAnchorLocation() { return _anchor; }
+
         void setRenderPosition( Vector2D<int> position ) { _renderPosition = position; }
         void setRenderSize( Vector2D<int> size ) { _renderSize = size; }
 
@@ -77,6 +80,7 @@ class ScreenComponent {
         virtual void render( SDL_Renderer* renderer ) = 0;
 
     protected:
+        AnchorLocation _anchor;
         DisplayConstraint _positionConstraint;
         DisplayConstraint _sizeConstraint;
         Vector2D<int> _absolutePosition;

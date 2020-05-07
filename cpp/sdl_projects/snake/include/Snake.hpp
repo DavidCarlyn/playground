@@ -25,6 +25,7 @@ class Snake : public ScreenComponent {
                 SnakePart();
                 SnakePart( Vector2D<int> size, Vector2D<int> gamePosition );
 
+                void setAbsolutePosition( Vector2D<int> position ) { ScreenComponent::setPosition( position ); }
                 void setSize( Vector2D<int> size );
                 void setPosition( Vector2D<int> position ) override;
                 Vector2D<int> getGamePosition() { return _gamePosition; }
@@ -33,6 +34,8 @@ class Snake : public ScreenComponent {
 
                 void update( Vector2D<int> gamePosition );
                 void grow( Vector2D<int> prevGamePosition );
+
+                void updateAbsolutePosition( Vector2D<int> position );
 
                 virtual void render( SDL_Renderer* renderer ) override;
             private:

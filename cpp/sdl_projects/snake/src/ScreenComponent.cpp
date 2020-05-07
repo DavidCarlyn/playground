@@ -1,26 +1,43 @@
 #include <ScreenComponent.hpp>
 
-ScreenComponent::ScreenComponent() {
-    _size = Vector2D<int>( 0, 0 );
-    _position = Vector2D<int>( 0, 0 );
-    _displayType = DisplayType::RELATIVE;
-}
-
-ScreenComponent::ScreenComponent( Vector2D<int> size ) {
-    _size = size;
-    _position = Vector2D<int>( 0, 0 );
-    _displayType = DisplayType::ABSOLUTE;
-}
+ScreenComponent::ScreenComponent() : ScreenComponent( Vector2D<float>( 1.0f, 1.0f ) ) {}
 
 ScreenComponent::ScreenComponent( Vector2D<int> size, Vector2D<int> position ) {
-    _size = size;
-    _position = position;
-    _displayType = DisplayType::ABSOLUTE;
+    _anchor = AnchorLocation::NONE;
+    _absoluteSize = size;
+    _absolutePosition = position;
+    _positionConstraint = ABSOLUTE;
+    _sizeConstraint = ABSOLUTE;
+    _renderPosition = Vector2D<int>( 0, 0 );
+    _renderSize = Vector2D<int>( 0, 0 );
 }
 
-ScreenComponent::ScreenComponent( Vector2D<float> size ) {
+ScreenComponent::ScreenComponent( Vector2D<float> size, Vector2D<float> position ) {
+    _anchor = AnchorLocation::NONE;
     _relativeSize = size;
-    _size = Vector2D<int>( 0, 0 );
-    _position = Vector2D<int>( 0, 0 );
-    _displayType = DisplayType::RELATIVE;
+    _relativePosition = position;
+    _positionConstraint = RELATIVE;
+    _sizeConstraint = RELATIVE;
+    _renderPosition = Vector2D<int>( 0, 0 );
+    _renderSize = Vector2D<int>( 0, 0 );
+}
+
+ScreenComponent::ScreenComponent( Vector2D<int> size, Vector2D<float> position ) {
+    _anchor = AnchorLocation::NONE;
+    _absoluteSize = size;
+    _relativePosition = position;
+    _positionConstraint = RELATIVE;
+    _sizeConstraint = ABSOLUTE;
+    _renderPosition = Vector2D<int>( 0, 0 );
+    _renderSize = Vector2D<int>( 0, 0 );
+}
+
+ScreenComponent::ScreenComponent( Vector2D<float> size, Vector2D<int> position ) {
+    _anchor = AnchorLocation::NONE;
+    _relativeSize = size;
+    _absolutePosition = position;
+    _positionConstraint = ABSOLUTE;
+    _sizeConstraint = RELATIVE;
+    _renderPosition = Vector2D<int>( 0, 0 );
+    _renderSize = Vector2D<int>( 0, 0 );
 }

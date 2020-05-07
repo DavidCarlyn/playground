@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ScreenComponent.hpp>
+#include <DisplayMode.hpp>
 #include <list>
 
 class Panel : public ScreenComponent {
@@ -8,12 +9,10 @@ class Panel : public ScreenComponent {
         Panel();
         ~Panel();
 
-        Panel( Vector2D<int> size );
-        Panel( Vector2D<int> size, Vector2D<int> position);
-        Panel( Vector2D<float> size );
-
-        virtual void setSize( Vector2D<int> size ) override;
-        virtual void setSize( Vector2D<float> size ) override;
+        Panel( Vector2D<int> size, Vector2D<int> position = Vector2D<int>( 0, 0 ), DisplayMode* displayMode = new Relative() );
+        Panel( Vector2D<float> size, Vector2D<float> position = Vector2D<float>( 0.0f, 0.0f ), DisplayMode* displayMode = new Relative() );
+        Panel( Vector2D<int> size, Vector2D<float> position, DisplayMode* displayMode = new Relative() );
+        Panel( Vector2D<float> size, Vector2D<int> position, DisplayMode* displayMode = new Relative() );
 
         void setBackgroundColor( SDL_Color color ) { _backgroundColor = color; }
 
@@ -23,4 +22,5 @@ class Panel : public ScreenComponent {
     protected:
         std::list<ScreenComponent*> _components;
         SDL_Color _backgroundColor;
+        DisplayMode* _displayMode;
 };

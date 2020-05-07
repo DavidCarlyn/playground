@@ -6,26 +6,20 @@
 class DisplayMode {
     public:
         DisplayMode() {}
-        virtual void positionComponents( SDL_Rect* clippingRectangle, std::list<ScreenComponent*> components );
-}
-
-class Absolute : public DisplayMode {
-    public:
-        Absolute() : DisplayMode() {}
-        virtual void positionComponents( SDL_Rect* clippingRectangle, std::list<ScreenComponent*> components );
-}
+        virtual void positionComponents( SDL_Rect* clippingRectangle, std::list<ScreenComponent*> components ) = 0;
+};
 
 class Relative : public DisplayMode {
     public:
         Relative() : DisplayMode() {}
         virtual void positionComponents( SDL_Rect* clippingRectangle, std::list<ScreenComponent*> components );
-}
+};
 
 class Anchor : public DisplayMode {
     public:
         Anchor() : DisplayMode() {}
         virtual void positionComponents( SDL_Rect* clippingRectangle, std::list<ScreenComponent*> components );
-}
+};
 
 class Grid : public DisplayMode {
     public:
@@ -35,4 +29,4 @@ class Grid : public DisplayMode {
     private:
         int _rows;
         int _cols;
-}
+};

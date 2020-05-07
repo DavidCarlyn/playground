@@ -112,7 +112,8 @@ void Texture::setAlpha( Uint8 alpha ) {
 }
 
 void Texture::render( SDL_Renderer* renderer ) {
-	SDL_Rect renderQuad = { _position.getFirst(), _position.getSecond(), _size.getFirst(), _size.getSecond() };
+	SDL_Rect renderQuad = { getRenderPosition().getFirst(), getRenderPosition().getSecond(),
+							getRenderSize().getFirst(), getRenderSize().getSecond() };
 
 	SDL_RenderCopy( renderer, _texture, NULL, &renderQuad );
 }

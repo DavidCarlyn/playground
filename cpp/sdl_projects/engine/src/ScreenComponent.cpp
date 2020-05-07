@@ -3,6 +3,7 @@
 ScreenComponent::ScreenComponent() : ScreenComponent( Vector2D<float>( 1.0f, 1.0f ) ) {}
 
 ScreenComponent::ScreenComponent( Vector2D<int> size, Vector2D<int> position ) {
+    _anchor = AnchorLocation::NONE;
     _absoluteSize = size;
     _absolutePosition = position;
     _positionConstraint = ABSOLUTE;
@@ -12,6 +13,7 @@ ScreenComponent::ScreenComponent( Vector2D<int> size, Vector2D<int> position ) {
 }
 
 ScreenComponent::ScreenComponent( Vector2D<float> size, Vector2D<float> position ) {
+    _anchor = AnchorLocation::NONE;
     _relativeSize = size;
     _relativePosition = position;
     _positionConstraint = RELATIVE;
@@ -21,6 +23,7 @@ ScreenComponent::ScreenComponent( Vector2D<float> size, Vector2D<float> position
 }
 
 ScreenComponent::ScreenComponent( Vector2D<int> size, Vector2D<float> position ) {
+    _anchor = AnchorLocation::NONE;
     _absoluteSize = size;
     _relativePosition = position;
     _positionConstraint = RELATIVE;
@@ -30,6 +33,7 @@ ScreenComponent::ScreenComponent( Vector2D<int> size, Vector2D<float> position )
 }
 
 ScreenComponent::ScreenComponent( Vector2D<float> size, Vector2D<int> position ) {
+    _anchor = AnchorLocation::NONE;
     _relativeSize = size;
     _absolutePosition = position;
     _positionConstraint = ABSOLUTE;

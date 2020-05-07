@@ -29,9 +29,9 @@ class GameScene : public Scene {
 		int getScore() { return _score; }
 	private:
 		int getRandomPosition( int max ) { return rand() % max; }
-		int getBlockSize() {
-			int xBlockSize = ( _screenWidth - _borderPadding.getFirst() ) / _xBlocks;
-			int yBlockSize = ( _screenHeight - _borderPadding.getSecond() ) / _yBlocks;
+		int getBlockSize( Vector2D<int> size ) {
+			int xBlockSize = ( size.getFirst() ) / _xBlocks;
+			int yBlockSize = ( size.getSecond() ) / _yBlocks;
 			return xBlockSize < yBlockSize ? xBlockSize : yBlockSize;
 		}
 
@@ -40,7 +40,6 @@ class GameScene : public Scene {
 		int _xBlocks;
 		int _yBlocks;
 		int _score;
-		Vector2D<int> _borderPadding;
 };
 
 int GameScene::start() {
@@ -50,22 +49,22 @@ int GameScene::start() {
 	_screenWidth = _surface->w;
 
 	const int ticksPerFrame = 100;
-	const int borderThickness = 6;
-    _borderPadding = Vector2D<int>( borderThickness/2, borderThickness/2 );
 
 	_yBlocks = 30;
 	_xBlocks = 50;
 
-	int blockSize = getBlockSize();
 
-	Panel* windowPanel = new Panel( Vector2D<int>( _screenWidth, _screenHeight ) );
+	Panel* windowPanel = new Panel( Vector2D<int>( _screenWidth, _screenHeight ), Vector2D<int>( 0, 0 ), new Anchor() );
+	windowPanel->setRenderSize( Vector2D<int>( _screenWidth, _screenHeight ) );
     windowPanel->setBackgroundColor( { 0, 0, 0, 255 } );
 
     Panel* scorePanel = new Panel( Vector2D<float>( 1.0f, 0.2f ) );
+	scorePanel->setAnchorLocation( NORTH );
     scorePanel->setBackgroundColor( { 0, 0, 0, 255 } );
 
-    Panel* gamePanel = new Panel( Vector2D<float>( 1.0f, 0.8f ) );
-    gamePanel->setBackgroundColor( { 255, 255, 255, 255 } );
+    Panel* gamePanel = new Panel( Vector2D<float>( 1.0f, 0.8f ), Vector2D<int>( 0, 20 ), new Anchor() );
+	gamePanel->setAnchorLocation( SOUTH );
+    gamePanel->setBackgroundColor( { 0, 255, 255, 255 } );
 
     windowPanel->addComponent( scorePanel );
     windowPanel->addComponent( gamePanel );
@@ -81,18 +80,20 @@ int GameScene::start() {
 
     scorePanel->addComponent( text );
 
-    Snake* snake = new Snake( Vector2D<int>( blockSize, blockSize ), Vector2D<int>( 1, 1 ) );
-    snake->setPosition( _borderPadding );
-	Food* food = new Food( Vector2D<int>( blockSize, blockSize ), Vector2D<int>( getRandomPosition( _xBlocks ), getRandomPosition( _yBlocks ) ) );
-    food->setPosition( _borderPadding );
+	windowPanel->render( _renderer );
+
+	int blockSize = getBlockSize( gamePanel->getRenderSize() );
 
     Panel* gameBoard = new Panel( Vector2D<int>( blockSize * _xBlocks, blockSize * _yBlocks) );
     gameBoard->setBackgroundColor( { 0, 0, 0, 255 } );
-    gameBoard->setPosition( _borderPadding );
+	gameBoard->setAnchorLocation( CENTER );
     
     gamePanel->addComponent( gameBoard );
-    gamePanel->addComponent( snake );
-    gamePanel->addComponent( food );
+
+    Snake* snake = new Snake( Vector2D<int>( blockSize, blockSize ), Vector2D<int>( 1, 1 ) );
+	Food* food = new Food( Vector2D<int>( blockSize, blockSize ), Vector2D<int>( getRandomPosition( _xBlocks ), getRandomPosition( _yBlocks ) ) );
+    gameBoard->addComponent( snake );
+    gameBoard->addComponent( food );
 
 	bool quit = false;
 	SDL_Event e;
@@ -113,11 +114,9 @@ int GameScene::start() {
 					case SDL_WINDOWEVENT_RESIZED:
 						_screenWidth = e.window.data1;
 						_screenHeight = e.window.data2;
-                        blockSize = getBlockSize();
-                        snake->setPosition( _borderPadding );
-                        food->setPosition( _borderPadding );
-                        gameBoard->setPosition( _borderPadding );
+                        blockSize = getBlockSize( Vector2D<int>( Vector2D<int>( _screenWidth, _screenHeight ) * gamePanel->getRelativeSize() ) );
                         windowPanel->setSize( Vector2D<int>( _screenWidth, _screenHeight ) );
+                        windowPanel->setRenderSize( Vector2D<int>( _screenWidth, _screenHeight ) );
                         gameBoard->setSize( Vector2D<int>( blockSize * _xBlocks, blockSize * _yBlocks) );
                         snake->setSize( Vector2D<int>( blockSize, blockSize ) );
                         food->setSize( Vector2D<int>( blockSize, blockSize ) );
@@ -214,7 +213,8 @@ int StartingScene::start() {
 	int screenHeight = _surface->h;
 	int screenWidth = _surface->w;
 
-	Panel* windowPanel = new Panel( Vector2D<int>( screenWidth, screenHeight ) );
+	Panel* windowPanel = new Panel( Vector2D<int>( screenWidth, screenHeight ), Vector2D<int>( 0, 0 ), new Anchor() );
+	windowPanel->setRenderSize( Vector2D<int>( screenWidth, screenHeight ) );
     windowPanel->setBackgroundColor( { 0, 0, 0, 255 } );
 
 	TTF_Font* font = TTF_OpenFont( FONTPATH.c_str(), 56 );
@@ -222,11 +222,13 @@ int StartingScene::start() {
 		std::cout << TTF_GetError() << std::endl;
 	}
 
-	Texture* title = new Texture( Vector2D<float>( 1.0f, 0.5f ) );
+	Texture* title = new Texture( Vector2D<float>( 0.4f, 0.2f ) );
 	title->loadText( _renderer, "Snake", font, { 0, 255, 0, 255 } );
+	title->setAnchorLocation( NORTH );
 
-	Texture* instructions = new Texture( Vector2D<float>( 1.0f, 0.5f ) );
+	Texture* instructions = new Texture( Vector2D<float>( 0.6f, 0.1f ) );
 	instructions->loadText( _renderer, "Click Left Mouse to Play...", font, { 0, 255, 0, 255 } );
+	instructions->setAnchorLocation( CENTER );
 
 	windowPanel->addComponent( title );
 	windowPanel->addComponent( instructions );
@@ -248,6 +250,7 @@ int StartingScene::start() {
 						screenWidth = e.window.data1;
 						screenHeight = e.window.data2;
 						windowPanel->setSize( Vector2D<int>( screenWidth, screenHeight ) );
+						windowPanel->setRenderSize( Vector2D<int>( screenWidth, screenHeight ) );
 
                 }
             } else if ( e.type == SDL_MOUSEBUTTONUP ) {
@@ -277,7 +280,8 @@ int EndingScene::start() {
 	int screenHeight = _surface->h;
 	int screenWidth = _surface->w;
 
-	Panel* windowPanel = new Panel( Vector2D<int>( screenWidth, screenHeight ) );
+	Panel* windowPanel = new Panel( Vector2D<int>( screenWidth, screenHeight ), Vector2D<int>( 0, 0 ), new Anchor() );
+    windowPanel->setRenderSize( Vector2D<int>( screenWidth, screenHeight ) );
     windowPanel->setBackgroundColor( { 0, 0, 0, 255 } );
 
 	TTF_Font* font = TTF_OpenFont( FONTPATH.c_str(), 56 );
@@ -285,20 +289,28 @@ int EndingScene::start() {
 		std::cout << TTF_GetError() << std::endl;
 	}
 
-	Texture* gameOverText = new Texture( Vector2D<float>( 1.0f, 0.333f ) );
+	Texture* gameOverText = new Texture( Vector2D<float>( 0.5f, 0.15f ) );
 	gameOverText->loadText( _renderer, "Game Over", font, { 0, 255, 0, 255 } );
+	gameOverText->setAnchorLocation( NORTH );
 	
-	Panel* scorePanel = new Panel( Vector2D<float>( 1.0f, 0.333f ) );
+	Panel* scorePanel = new Panel( Vector2D<float>( 0.75f, 0.2f ) );
 	scorePanel->setBackgroundColor( { 0, 0, 0, 255 } );
+	scorePanel->setAnchorLocation( CENTER );
 
-	Panel* options = new Panel( Vector2D<float>( 1.0f, 0.333f ) );
-	options->setBackgroundColor( { 0, 0, 0, 255 } );
+	Texture* playAgain = new Texture( Vector2D<float>( 0.4f, 0.2f ) );
+	playAgain->loadText( _renderer, "Play Again", font, { 0, 255, 0, 255 } );
+	playAgain->setAnchorLocation( SOUTHWEST );
+
+	Texture* quitButton = new Texture( Vector2D<float>( 0.4f, 0.2f ) );
+	quitButton->loadText( _renderer, "Quit", font, { 0, 255, 0, 255 } );
+	quitButton->setAnchorLocation( SOUTHEAST );
 
 	windowPanel->addComponent( gameOverText );
 	windowPanel->addComponent( scorePanel );
-	windowPanel->addComponent( options );
+	windowPanel->addComponent( quitButton );
+	windowPanel->addComponent( playAgain );
 
-	Texture* scoreLabel = new Texture( Vector2D<float>( 0.48f, 1.0f ) );
+	Texture* scoreLabel = new Texture( Vector2D<float>( 0.7f, 1.0f ) );
 	scoreLabel->loadText( _renderer, "Score: " , font, { 0, 255, 0, 255 } );
 
 	float size = 0.00f;
@@ -314,14 +326,6 @@ int EndingScene::start() {
 	scorePanel->addComponent( scoreLabel );
 	scorePanel->addComponent( scoreText );
 
-	Texture* playAgain = new Texture( Vector2D<float>( 0.48f, 1.0f ) );
-	playAgain->loadText( _renderer, "Play Again", font, { 0, 255, 0, 255 } );
-
-	Texture* quitButton = new Texture( Vector2D<float>( 0.48f, 1.0f ) );
-	quitButton->loadText( _renderer, "Quit", font, { 0, 255, 0, 255 } );
-
-	options->addComponent( playAgain );
-	options->addComponent( quitButton );
 
 	bool quit = false;
 	SDL_Event e;
@@ -340,13 +344,16 @@ int EndingScene::start() {
 						screenWidth = e.window.data1;
 						screenHeight = e.window.data2;
 						windowPanel->setSize( Vector2D<int>( screenWidth, screenHeight ) );
+						windowPanel->setRenderSize( Vector2D<int>( screenWidth, screenHeight ) );
 
                 }
             } else if ( e.type == SDL_MOUSEBUTTONUP ) {
-				if ( e.button.y >= options->getPosition().getSecond() ) {
-					quit = true;
-					if ( e.button.x <= options->getPosition().getFirst() + options->getSize().getFirst() / 2 ) {
+				if ( e.button.y >= playAgain->getRenderPosition().getSecond() ) {
+					if ( e.button.x <= playAgain->getRenderPosition().getFirst() + playAgain->getRenderSize().getFirst() / 2 ) {
+						quit = true;
 						playAgainReturn = 1;
+					} else if ( e.button.x > quitButton->getRenderPosition().getFirst() ) {
+						quit = true;
 					}
 				}
 			}

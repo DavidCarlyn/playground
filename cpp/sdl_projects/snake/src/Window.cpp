@@ -22,6 +22,7 @@ Window::Window( std::string name, Vector2D<int> size ) {
 	}
 
     _windowPanel = new Panel( size, Vector2D<int>(0, 0) );
+	_windowPanel->setRenderSize( size );
 }
 
 Window::~Window() {
@@ -50,6 +51,7 @@ void Window::display() {
 						int screenWidth = e.window.data1;
 						int screenHeight = e.window.data2;
                         _windowPanel->setSize( Vector2D<int>( screenWidth, screenHeight ) );
+                        _windowPanel->setRenderSize( Vector2D<int>( screenWidth, screenHeight ) );
                 }
             }
 		}
