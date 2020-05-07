@@ -35,7 +35,7 @@ void Panel::addComponent( ScreenComponent* component ) {
     _components.push_back( component );
 }
 
-void Panel::render( SDL_Renderer* renderer ) {
+void Panel::render( SDL_Renderer* renderer, SDL_Rect* clip, const double angle ) {
     SDL_SetRenderDrawColor( renderer, _backgroundColor.r, _backgroundColor.g, _backgroundColor.b, _backgroundColor.a );
     SDL_Rect rect;
     rect.x = getRenderPosition().getFirst();

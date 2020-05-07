@@ -90,8 +90,18 @@ int GameScene::start() {
     
     gamePanel->addComponent( gameBoard );
 
+	Texture* snakeSprites = new Texture();
+	snakeSprites->load( _renderer, "snake_sprite_sheet.png" );
+	SDL_Rect foodClip;
+	foodClip.x = 16;
+	foodClip.y = 0;
+	foodClip.w = 16;
+	foodClip.h = 16;
+
     Snake* snake = new Snake( Vector2D<int>( blockSize, blockSize ), Vector2D<int>( 1, 1 ) );
+	snake->setTexture( snakeSprites );
 	Food* food = new Food( Vector2D<int>( blockSize, blockSize ), Vector2D<int>( getRandomPosition( _xBlocks ), getRandomPosition( _yBlocks ) ) );
+	food->setTexture( snakeSprites, &foodClip );
     gameBoard->addComponent( snake );
     gameBoard->addComponent( food );
 

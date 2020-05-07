@@ -12,7 +12,7 @@ class Texture : public ScreenComponent {
         Texture( Vector2D<float> size );
 		~Texture();
 
-		bool load( SDL_Renderer* renderer, std::string path );
+		bool load( SDL_Renderer* renderer, std::string path, SDL_Color colorKey = { 255, 255, 255, 255 } );
 		bool loadText( SDL_Renderer* renderer, std::string textureText, TTF_Font* font, SDL_Color textColor );
 
 		void free();
@@ -20,7 +20,7 @@ class Texture : public ScreenComponent {
 		void setBlendMode( SDL_BlendMode blending );
 		void setAlpha( Uint8 alpha );
 		
-		virtual void render( SDL_Renderer* renderer ) override;
+		virtual void render( SDL_Renderer* renderer, SDL_Rect* clip = NULL, const double angle = 0 ) override;
 
 		int getWidth();
 		int getHeight();

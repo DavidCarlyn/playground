@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ScreenComponent.hpp>
+#include <Texture.hpp>
 
 class Food : public ScreenComponent {
     public:
@@ -10,7 +10,11 @@ class Food : public ScreenComponent {
         Vector2D<int> getGamePosition() { return _gamePosition; }
         void setGamePosition( Vector2D<int> position ) { _gamePosition = position; }
 
-        virtual void render( SDL_Renderer* renderer ) override;
+        void setTexture( Texture* texture, SDL_Rect* clip ) { _spriteSheet = texture; _spriteClip = clip; }
+
+        virtual void render( SDL_Renderer* renderer, SDL_Rect* clip = NULL, const double angle = 0 ) override;
     private:
         Vector2D<int> _gamePosition;
+        Texture* _spriteSheet;
+        SDL_Rect* _spriteClip;
 };

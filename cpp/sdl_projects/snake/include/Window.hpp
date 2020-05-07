@@ -11,6 +11,9 @@ class Window {
         Window( std::string name, Vector2D<int> size );
         ~Window();
 
+        Panel* getPanel() { return _windowPanel; }
+        SDL_Renderer* getRenderer() { return _renderer; }
+
         void addComponent( ScreenComponent* component ) { _windowPanel->addComponent( component ); }
         void display();
 

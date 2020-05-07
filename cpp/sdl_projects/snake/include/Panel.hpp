@@ -17,7 +17,7 @@ class Panel : public ScreenComponent {
         void setBackgroundColor( SDL_Color color ) { _backgroundColor = color; }
 
         virtual void addComponent( ScreenComponent* component );
-        virtual void render( SDL_Renderer* renderer ) override;
+        virtual void render( SDL_Renderer* renderer, SDL_Rect* clip = NULL, const double angle = 0 ) override;
 
     protected:
         std::list<ScreenComponent*> _components;

@@ -10,14 +10,26 @@ and may not be redistributed without written permission.*/
 #include <SDL_ttf.h>
 #include <Engine.hpp>
 #include <Window.hpp>
+#include <Food.hpp>
+#include <Texture.hpp>
+
+const std::string sprites = "bin/snake_sprite_sheet.png";
 
 int main( int argc, char* args[] ) {
 	Window* window = new Window( "Testing", Vector2D<int>( 1080, 720 ) );
+	window->getPanel()->setBackgroundColor( { 100, 100, 100 } );
 
-	Panel* testPanel = new Panel( Vector2D<float>( 0.8f, 0.8f ) );
-	testPanel->setBackgroundColor( { 100, 200, 50, 255} );
+	Texture* snakeSprites = new Texture();
+	snakeSprites->load( window->getRenderer(), sprites );
 
-	window->addComponent( testPanel );
+	Food* food = new Food( Vector2D<int>( 48, 48 ), Vector2D<int>( 5, 5 ) );
+	SDL_Rect clip;
+	clip.x = 16;
+	clip.y = 0;
+	clip.w = 16;
+	clip.h = 16;
+	food->setTexture( snakeSprites, &clip );
+	window->addComponent( food );
 
 	window->display();
 

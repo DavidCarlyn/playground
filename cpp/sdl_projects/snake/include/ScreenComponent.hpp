@@ -77,7 +77,7 @@ class ScreenComponent {
         Vector2D<int> getRenderPosition() const { return _renderPosition; }
         Vector2D<int> getRenderSize() const { return _renderSize; }
 
-        virtual void render( SDL_Renderer* renderer ) = 0;
+        virtual void render( SDL_Renderer* renderer, SDL_Rect* clip = NULL, const double angle = 0 ) = 0;
 
     protected:
         AnchorLocation _anchor;
