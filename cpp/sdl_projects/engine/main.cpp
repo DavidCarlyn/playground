@@ -10,6 +10,7 @@ and may not be redistributed without written permission.*/
 #include <SDL_ttf.h>
 #include <Engine.hpp>
 #include <Window.hpp>
+#include <Button.hpp>
 
 class MyMouseListener : public MouseListener {
     public:
@@ -37,10 +38,23 @@ class MyKeyListener : public KeyListener {
         }
 };
 
+class MyActionListener : public ActionListener {
+    public:
+        MyActionListener() {}
+
+        void onAction() override {
+            std::cout << "Action" << std::endl;
+        }
+};
+
 int main( int argc, char* args[] ) {
 	Window* window = new Window( "Testing", Vector2D<int>( 1080, 720 ) );
     //window->addMouseListener( new MyMouseListener() );
-    window->addKeyListener( new MyKeyListener() );
+    //window->addKeyListener( new MyKeyListener() );
+    Button* myButton = new Button( Vector2D<float>( 0.6f, 0.6f ) );
+    myButton->addActionListener( new MyActionListener() );
+    window->addMouseListener( myButton );
+    window->addComponent( myButton );
 
 	window->display();
 
