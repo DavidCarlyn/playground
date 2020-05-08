@@ -26,7 +26,7 @@ Texture::~Texture() {
 	free();
 }
 
-bool Texture::load( SDL_Renderer* renderer, std::string path ) {
+bool Texture::load( SDL_Renderer* renderer, std::string path, SDL_Color colorKey ) {
 	free();
 
 	SDL_Texture* newTexture = NULL;
@@ -40,7 +40,7 @@ bool Texture::load( SDL_Renderer* renderer, std::string path ) {
 	}
 
 	//Color key image
-	SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, 0, 0xFF, 0xFF ) );
+	SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, colorKey.r, colorKey.g, colorKey.b ) );
 
 	//Create texture from surface pixels
     newTexture = SDL_CreateTextureFromSurface( renderer, loadedSurface );
@@ -111,9 +111,9 @@ void Texture::setAlpha( Uint8 alpha ) {
 	SDL_SetTextureAlphaMod( _texture, alpha );
 }
 
-void Texture::render( SDL_Renderer* renderer ) {
+void Texture::render( SDL_Renderer* renderer, SDL_Rect* clip, const double angle ) {
 	SDL_Rect renderQuad = { getRenderPosition().getFirst(), getRenderPosition().getSecond(),
 							getRenderSize().getFirst(), getRenderSize().getSecond() };
 
-	SDL_RenderCopy( renderer, _texture, NULL, &renderQuad );
+	SDL_RenderCopyEx( renderer, _texture, clip, &renderQuad, angle, NULL, SDL_FLIP_NONE );
 }

@@ -53,7 +53,27 @@ void Window::display() {
                         _windowPanel->setSize( Vector2D<int>( screenWidth, screenHeight ) );
                         _windowPanel->setRenderSize( Vector2D<int>( screenWidth, screenHeight ) );
                 }
-            }
+            } else if ( e.type == SDL_MOUSEBUTTONDOWN ) {
+				for ( auto listener : _mouseListeners ) {
+					listener->onMouseDown( Vector2D<int>( e.button.x, e.button.y ) );
+				}
+			} else if ( e.type == SDL_MOUSEBUTTONUP ) {
+				for ( auto listener : _mouseListeners ) {
+					listener->onMouseUp( Vector2D<int>( e.button.x, e.button.y ) );
+				}
+			} else if ( e.type == SDL_MOUSEMOTION ) {
+				for ( auto listener : _mouseListeners ) {
+					listener->onMouseMove( Vector2D<int>( e.button.x, e.button.y ) );
+				}
+			} else if ( e.type == SDL_KEYDOWN ) {
+				for ( auto listener : _keyListeners ) {
+					listener->onKeyDown( e.key.keysym.sym );
+				}
+			} else if ( e.type == SDL_KEYUP ) {
+				for ( auto listener : _keyListeners ) {
+					listener->onKeyUp( e.key.keysym.sym );
+				}
+			}
 		}
 
 
