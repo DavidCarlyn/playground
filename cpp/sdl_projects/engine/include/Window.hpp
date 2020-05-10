@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Panel.hpp>
+#include <Scene.hpp>
 #include <string>
 
 class MouseListener {
@@ -34,6 +34,7 @@ class Window {
         void addMouseListener( MouseListener* listener ) { _mouseListeners.push_back( listener ); }
         void addKeyListener( KeyListener* listener ) { _keyListeners.push_back( listener ); }
 
+        void setScene( Scene* scene );
         void addComponent( ScreenComponent* component ) { _windowPanel->addComponent( component ); }
         void display();
 
@@ -48,5 +49,7 @@ class Window {
 
         std::list<MouseListener*> _mouseListeners;
         std::list<KeyListener*> _keyListeners;
+
+        Scene* _scene;
 
 };

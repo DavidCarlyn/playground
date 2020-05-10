@@ -29,16 +29,30 @@ Window::~Window() {
     SDL_FreeSurface( _surface );
     SDL_DestroyRenderer( _renderer );
     SDL_DestroyWindow( _window );
+	delete _scene;
 
+	_scene = NULL;
     _surface = NULL;
     _window = NULL;
     _renderer = NULL;
+}
+
+void Window::setScene( Scene* scene ) {
+	if ( _scene != NULL ) {
+		_windowPanel->clearComponents();
+		delete _scene;
+	}
+
+	_scene = scene;
+	_scene->build( _windowPanel, _renderer );
 }
 
 void Window::display() {
     SDL_Event e;
     bool quit = false;
     while ( !quit ) {
+
+
 		//Handle events on queue
 		while ( SDL_PollEvent( &e ) != 0 ) {
 			//User requests quit
@@ -76,6 +90,11 @@ void Window::display() {
 			}
 		}
 
+		if ( _scene == NULL ) {
+			return;
+		} else if ( !_scene->loop() ) {
+			setScene( _scene->getNextScene() );
+		}
 
         //Clear screen
 		SDL_SetRenderDrawColor( _renderer, 0x00, 0x00, 0x00, 0xFF );

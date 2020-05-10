@@ -14,7 +14,9 @@ class Panel : public ScreenComponent {
         Panel( Vector2D<int> size, Vector2D<float> position, DisplayMode* displayMode = new Relative() );
         Panel( Vector2D<float> size, Vector2D<int> position, DisplayMode* displayMode = new Relative() );
 
+        void setDisplayMode( DisplayMode* mode ) { delete _displayMode; _displayMode = mode; }
         void setBackgroundColor( SDL_Color color ) { _backgroundColor = color; }
+        void clearComponents() { _components.clear(); }
 
         virtual void addComponent( ScreenComponent* component );
         virtual void render( SDL_Renderer* renderer, SDL_Rect* clip = NULL, const double angle = 0 ) override;
