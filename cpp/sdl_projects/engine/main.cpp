@@ -12,32 +12,6 @@ and may not be redistributed without written permission.*/
 #include <Window.hpp>
 #include <Button.hpp>
 
-class MyMouseListener : public MouseListener {
-    public:
-        MyMouseListener() : MouseListener() {}
-
-        void onMouseUp( Vector2D<int> pos ) override {
-            std::cout << "x: " << pos.getFirst() << ", y: " << pos.getSecond() << std::endl;
-        }
-
-        void onMouseDown( Vector2D<int> pos ) override {
-            std::cout << "x: " << pos.getFirst() << ", y: " << pos.getSecond() << std::endl;
-        }
-
-        void onMouseMove( Vector2D<int> pos ) override {
-            std::cout << "x: " << pos.getFirst() << ", y: " << pos.getSecond() << std::endl;
-        }
-};
-
-class MyKeyListener : public KeyListener {
-    public:
-        MyKeyListener() : KeyListener() {}
-
-        void onKeyUp( SDL_Keycode key ) override {
-            std::cout << key << std::endl;
-        }
-};
-
 class MyActionListener : public ActionListener {
     public:
         MyActionListener() {}
@@ -47,69 +21,41 @@ class MyActionListener : public ActionListener {
         }
 };
 
-class Scene2 : public Scene {
-    public:
-        Scene2() : Scene() { _block = NULL; }
+class MyScene : public Scene {
+	public:
+		MyScene() : Scene() {}
 
-        bool build( Panel* p, SDL_Renderer* r ) override;
-        bool loop() override;
-    private:
-        Panel* _block;
+		bool build( Panel* panel, SDL_Renderer* renderer ) override {
+			_font = TTF_OpenFont( "bin/LemonMilk.otf", 12 );
+    		if( _font == NULL ) {
+        		std::cout << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << std::endl;
+				return false;
+    		}
+
+			panel->setDisplayMode( new Anchor );
+			Button* button = new Button( Vector2D<float>( 0.2f, 0.2f ) );
+			button->setAnchorLocation( CENTER );
+			button->addActionListener( new MyActionListener() );
+			button->setText( renderer, "Press Me", _font, { 255, 255, 255, 255} );
+
+			panel->addComponent( button );
+			panel->addMouseListener( button );
+			return true;
+		}
+
+		bool loop() override { return true; }
+
+	private:
+		TTF_Font* _font;
+
+
 };
-
-class Scene1 : public Scene {
-    public:
-        Scene1() : Scene() { _block = NULL; }
-
-        bool build( Panel* p, SDL_Renderer* r ) override;
-        bool loop() override;
-        Scene* getNextScene() override { return new Scene2(); }
-    private:
-        Panel* _block;
-};
-
-bool Scene1::build( Panel* windowPanel, SDL_Renderer* renderer ) {
-    windowPanel->setDisplayMode( new Relative() );
-    _block = new Panel( Vector2D<int>( 50, 50 ) );
-    _block->setBackgroundColor( { 100, 255, 0, 255 } );
-
-    windowPanel->addComponent( _block );
-
-    return true;
-}
-
-bool Scene1::loop() {
-    _block->setPosition( Vector2D<int>( 1, 1 ) + _block->getAbsolutePosition() );
-
-    if ( _block->getAbsolutePosition().getFirst() > 200 ) {
-        return false;
-    }
-    
-    return true;
-}
-
-bool Scene2::build( Panel* windowPanel, SDL_Renderer* renderer ) {
-    windowPanel->setDisplayMode( new Relative() );
-    _block = new Panel( Vector2D<int>( 50, 50 ) );
-    _block->setBackgroundColor( { 255, 100, 0, 255 } );
-
-    windowPanel->addComponent( _block );
-
-    return true;
-}
-
-bool Scene2::loop() {
-    _block->setPosition( Vector2D<int>( 1, 1 ) + _block->getAbsolutePosition() );
-    if ( _block->getAbsolutePosition().getFirst() > 200 ) {
-        return false;
-    }
-    
-    return true;
-}
 
 int main( int argc, char* args[] ) {
+	Engine* engine = new Engine();
 	Window* window = new Window( "Testing", Vector2D<int>( 1080, 720 ) );
-    window->setScene( new Scene1() );
+	window->setScene( new MyScene() );
+    
 
 	window->display();
 

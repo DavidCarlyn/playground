@@ -23,6 +23,8 @@ Window::Window( std::string name, Vector2D<int> size ) {
 
     _windowPanel = new Panel( size, Vector2D<int>(0, 0) );
 	_windowPanel->setRenderSize( size );
+
+	addMouseListener( _windowPanel );
 }
 
 Window::~Window() {

@@ -50,3 +50,33 @@ void Panel::render( SDL_Renderer* renderer, SDL_Rect* clip, const double angle )
         comp->render( renderer );
     }
 }
+
+void Panel::onMouseDown( Vector2D<int> mousePosition ) {
+    for ( auto listener : _mouseListeners ) {
+        listener->onMouseDown( mousePosition );
+    }
+}
+
+void Panel::onMouseUp( Vector2D<int> mousePosition ) {
+    for ( auto listener : _mouseListeners ) {
+        listener->onMouseUp( mousePosition );
+    }
+}
+
+void Panel::onMouseMove( Vector2D<int> mousePosition ) {
+    for ( auto listener : _mouseListeners ) {
+        listener->onMouseMove( mousePosition );
+    }
+}
+
+void Panel::onKeyDown( SDL_Keycode key ) {
+    for ( auto listener : _keyListeners ) {
+        listener->onKeyDown( key );
+    }
+}
+
+void Panel::onKeyUp( SDL_Keycode key ) {
+    for ( auto listener : _keyListeners ) {
+        listener->onKeyUp( key );
+    }
+}

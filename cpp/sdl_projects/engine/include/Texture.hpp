@@ -22,8 +22,7 @@ class Texture : public ScreenComponent {
 		
 		virtual void render( SDL_Renderer* renderer, SDL_Rect* clip = NULL, const double angle = 0 ) override;
 
-		int getWidth();
-		int getHeight();
+		Vector2D<int> getTextureSize() { return _textureSize; }
 
 	private:
 		SDL_Texture* _texture;
