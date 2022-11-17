@@ -8,7 +8,7 @@
     "node-spotify-api": "^1.1.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-scripts": "1.0.17",
+    "react-scripts": "5.0.1",
     "spotify-web-api-js": "^0.22.1"
   },
   "scripts": {
